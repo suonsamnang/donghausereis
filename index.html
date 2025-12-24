@@ -10,6 +10,7 @@
         
         .section-header { background-color: #1b4d5a; padding: 12px; font-size: 18px; font-weight: bold; border-radius: 4px; margin-bottom: 20px; }
 
+        /* 2-Column Grid */
         .movie-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         
         .movie-card { 
@@ -20,37 +21,76 @@
             display: flex;
             flex-direction: column;
             border: 1px solid #333;
+            transition: transform 0.3s ease;
         }
 
-        .poster-container { position: relative; width: 100%; aspect-ratio: 2 / 3; }
-        .poster-img { width: 100%; height: 100%; object-fit: cover; }
+        /* Hover effect: Subtle lift */
+        .movie-card:hover { transform: translateY(-5px); border-color: #007bff; }
+
+        .poster-container { 
+            position: relative; 
+            width: 100%; 
+            aspect-ratio: 2 / 3; 
+            overflow: hidden; /* Important for zoom effect */
+            cursor: pointer;
+        }
+
+        .poster-img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            transition: transform 0.5s ease; /* Smooth zoom */
+        }
+
+        /* Zoom effect on hover */
+        .movie-card:hover .poster-img { transform: scale(1.1); }
         
         /* Labels */
         .badge-type { position: absolute; top: 8px; right: 8px; background: #2c5ba1; font-size: 10px; padding: 3px 8px; border-radius: 4px; font-weight: bold; z-index: 2; }
-        .info-overlay { position: absolute; bottom: 0; width: 100%; background: linear-gradient(transparent, rgba(0,0,0,0.9)); padding: 8px; display: flex; justify-content: space-between; font-size: 11px; box-sizing: border-box; }
+        
+        .info-overlay { 
+            position: absolute; 
+            bottom: 0; 
+            width: 100%; 
+            background: linear-gradient(transparent, rgba(0,0,0,0.9)); 
+            padding: 8px; 
+            display: flex; 
+            justify-content: space-between; 
+            font-size: 11px; 
+            box-sizing: border-box; 
+            z-index: 2;
+        }
 
-        /* Movie Info Section */
-        .movie-details { padding: 10px; flex-grow: 1; display: flex; flex-direction: column; align-items: center; }
-        .movie-title { font-size: 13px; font-weight: bold; margin-bottom: 8px; text-align: center; height: 34px; overflow: hidden; }
-
-        /* THE "PLAY NOW" BUTTON */
-        .play-now-btn {
-            background-color: #007bff;
+        /* NEW: "PLAY NOW" BUTTON ON POSTER */
+        .play-btn-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background-color: rgba(0, 123, 255, 0.9);
             color: white;
-            border: none;
-            width: 100%;
-            padding: 8px 0;
+            padding: 10px 16px;
+            border-radius: 50px;
             font-size: 12px;
             font-weight: bold;
-            border-radius: 4px;
-            cursor: pointer;
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 5px;
-            transition: background 0.2s;
+            z-index: 3;
+            opacity: 0; /* Hidden by default */
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
-        .play-now-btn:active { background-color: #0056b3; transform: scale(0.98); }
+
+        /* Show button on hover */
+        .movie-card:hover .play-btn-overlay {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .movie-details { padding: 10px; text-align: center; background: #1e1e1e; }
+        .movie-title { font-size: 13px; font-weight: bold; margin: 0; }
 
         /* VIDEO PLAYER MODAL */
         #videoModal {
@@ -68,10 +108,13 @@
 
     <div class="movie-grid">
         
-        <div class="movie-card">
-            <div class="poster-container" onclick="openPlayer('https://www.youtube.com/embed/dQw4w9WgXcQ', 'Shrouding The Heavens')">
+        <div class="movie-card" onclick="openPlayer('https://www.youtube.com/embed/dQw4w9WgXcQ', 'Shrouding The Heavens')">
+            <div class="poster-container">
                 <span class="badge-type">DONGHUA</span>
                 <img src="https://raw.githubusercontent.com/suonsamnang/donghausereis/main/shrouding-the-heavens-lucifer-donghua-2.jpg" class="poster-img">
+                
+                <div class="play-btn-overlay">▶ PLAY NOW</div>
+                
                 <div class="info-overlay">
                     <span>Ep 141 <span style="color:#ffcc00">[4K]</span></span>
                     <span style="background:#d48806; padding:2px 4px; border-radius:2px; font-weight:bold;">SUB</span>
@@ -79,16 +122,16 @@
             </div>
             <div class="movie-details">
                 <div class="movie-title">Shrouding The Heavens</div>
-                <button class="play-now-btn" onclick="openPlayer('https://www.youtube.com/embed/dQw4w9WgXcQ', 'Shrouding The Heavens')">
-                    ▶ PLAY NOW
-                </button>
             </div>
         </div>
 
-        <div class="movie-card">
-            <div class="poster-container" onclick="openPlayer('YOUR_VIDEO_URL', 'World Defying Dan God')">
+        <div class="movie-card" onclick="openPlayer('YOUR_VIDEO_URL', 'World Defying Dan God')">
+            <div class="poster-container">
                 <span class="badge-type">DONGHUA</span>
                 <img src="https://via.placeholder.com/300x450" class="poster-img">
+                
+                <div class="play-btn-overlay">▶ PLAY NOW</div>
+                
                 <div class="info-overlay">
                     <span>Ep 06 <span style="color:#ffcc00">[4K]</span></span>
                     <span style="background:#d48806; padding:2px 4px; border-radius:2px; font-weight:bold;">SUB</span>
@@ -96,42 +139,5 @@
             </div>
             <div class="movie-details">
                 <div class="movie-title">World Defying Dan God</div>
-                <button class="play-now-btn" onclick="openPlayer('YOUR_VIDEO_URL', 'World Defying Dan God')">
-                    ▶ PLAY NOW
-                </button>
             </div>
         </div>
-
-    </div>
-
-    <div id="videoModal">
-        <div class="modal-header">
-            <button class="back-btn" onclick="closePlayer()">← Back</button>
-            <span id="playingTitle" style="margin-left:15px; font-size:14px; font-weight:bold; color:#ddd;"></span>
-        </div>
-        <iframe id="videoFrame" src="" allowfullscreen></iframe>
-    </div>
-
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.ready();
-
-        function openPlayer(url, title) {
-            if(url.includes('YOUR_VIDEO_URL')) {
-                tg.showAlert("Please add a real video link for: " + title);
-                return;
-            }
-            document.getElementById('playingTitle').innerText = title;
-            document.getElementById('videoFrame').src = url;
-            document.getElementById('videoModal').style.display = 'flex';
-            tg.HapticFeedback.impactOccurred('medium');
-        }
-
-        function closePlayer() {
-            document.getElementById('videoModal').style.display = 'none';
-            document.getElementById('videoFrame').src = '';
-        }
-    </script>
-</body>
-</html>
