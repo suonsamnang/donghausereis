@@ -163,9 +163,23 @@
             tele.showAlert("You selected: " + title);
         }
     </script>
+
+    <div class="movie-card" onclick="playMovie('https://your-video-link.com/movie1.mp4')">
+    <div class="poster-container">
+        <div class="play-overlay">▶</div>
+    </div>
+</div>
+
+<script>
+    function playMovie(videoUrl) {
+        // This opens the video in Telegram's built-in browser/player
+        window.Telegram.WebApp.openLink(videoUrl);
+    }
+</script>
 </body>
 
 </html>
+
 
 
 
