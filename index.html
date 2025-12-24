@@ -6,105 +6,77 @@
     <title>Donghua Series</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background-color: #121212; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; }
+        body { background-color: #121212; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; padding-top: 0; }
         
-        .section-header { background-color: #1b4d5a; padding: 12px; font-size: 18px; font-weight: bold; border-radius: 4px; margin-bottom: 20px; }
+        /* STEP 1: STICKY SEARCH BAR */
+        .search-container { position: sticky; top: 0; background: #121212; padding: 10px 0; z-index: 100; }
+        .search-input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #1e1e1e; color: white; box-sizing: border-box; outline: none; }
+        .search-input:focus { border-color: #007bff; }
 
+        /* STEP 2: CATEGORY TABS */
+        .category-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none; }
+        .category-scroll::-webkit-scrollbar { display: none; }
+        .cat-btn { background: #1e1e1e; border: 1px solid #333; color: #ccc; padding: 6px 15px; border-radius: 20px; white-space: nowrap; font-size: 13px; font-weight: bold; }
+        .cat-btn.active { background: #007bff; color: white; border-color: #007bff; }
+
+        .section-header { background-color: #1b4d5a; padding: 12px; font-size: 18px; font-weight: bold; border-radius: 4px; margin-bottom: 20px; }
         .movie-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         
-        .movie-card { 
-            background: #1e1e1e; 
-            border-radius: 12px; 
-            overflow: hidden; 
-            position: relative; 
-            border: 1px solid #333;
-            transition: all 0.3s ease;
-        }
+        .movie-card { background: #1e1e1e; border-radius: 12px; overflow: hidden; position: relative; border: 1px solid #333; transition: all 0.3s ease; }
+        .poster-container { position: relative; width: 100%; aspect-ratio: 2 / 3; overflow: hidden; cursor: pointer; }
+        .poster-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
 
-        .poster-container { 
-            position: relative; 
-            width: 100%; 
-            aspect-ratio: 2 / 3; 
-            overflow: hidden;
-            cursor: pointer;
-        }
+        .play-btn-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.5); background-color: rgba(0, 123, 255, 0.9); color: white; padding: 12px 20px; border-radius: 50px; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; z-index: 5; opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; }
+        .movie-card:hover .poster-img { transform: scale(1.1); filter: brightness(0.7); }
+        .movie-card:hover .play-btn-overlay { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 
-        .poster-img { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-            transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
-        }
-
-        /* CENTERED PLAY BUTTON */
-        .play-btn-overlay {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.5); /* Start small */
-            background-color: rgba(0, 123, 255, 0.9);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 50px;
-            font-size: 13px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            z-index: 5;
-            opacity: 0;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 0 20px rgba(0, 123, 255, 0.5);
-            pointer-events: none; /* Click goes through to card */
-            white-space: nowrap;
-        }
-
-        /* HOVER EFFECTS */
-        .movie-card:hover { border-color: #007bff; box-shadow: 0 0 15px rgba(0, 123, 255, 0.3); }
-        .movie-card:hover .poster-img { transform: scale(1.1) rotate(1deg); filter: brightness(0.7); }
-        .movie-card:hover .play-btn-overlay {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1); /* Pop into view */
-        }
-
-        /* Labels & Details */
         .badge-type { position: absolute; top: 10px; right: 10px; background: #2c5ba1; font-size: 10px; padding: 4px 10px; border-radius: 6px; font-weight: bold; z-index: 2; }
         .info-overlay { position: absolute; bottom: 0; width: 100%; background: linear-gradient(transparent, rgba(0,0,0,0.95)); padding: 10px; display: flex; justify-content: space-between; font-size: 11px; box-sizing: border-box; z-index: 2; }
         .movie-details { padding: 12px; text-align: center; background: #1e1e1e; }
         .movie-title { font-size: 14px; font-weight: 600; margin: 0; color: #eee; }
 
-        /* VIDEO PLAYER MODAL */
+        /* STEP 3: PLAYER MODAL & SPINNER */
         #videoModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; flex-direction: column; }
         .modal-header { padding: 12px; display: flex; align-items: center; background: #1a1a1a; }
         .back-btn { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; }
+        .loader { border: 4px solid #333; border-top: 4px solid #007bff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: -1; }
+        @keyframes spin { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
         #videoFrame { flex-grow: 1; border: none; width: 100%; height: 100%; }
     </style>
 </head>
 <body>
 
+    <div class="search-container">
+        <input type="text" class="search-input" id="searchInput" placeholder="Search Donghua..." onkeyup="filterMovies()">
+    </div>
+
+    <div class="category-scroll">
+        <button class="cat-btn active">All</button>
+        <button class="cat-btn">Popular</button>
+        <button class="cat-btn">Action</button>
+        <button class="cat-btn">Adventure</button>
+        <button class="cat-btn">Magic</button>
+    </div>
+
     <div class="section-header">Popular Today</div>
 
-    <div class="movie-grid">
-        
+    <div class="movie-grid" id="movieGrid">
         <div class="movie-card" onclick="openPlayer('https://www.youtube.com/embed/_ijfRi-1-Ss?autoplay=1', 'Shrouding The Heavens Ep 141')">
-    <div class="poster-container">
-        <span class="badge-type">DONGHUA</span>
-        <img src="https://raw.githubusercontent.com/suonsamnang/donghausereis/main/shrouding-the-heavens-lucifer-donghua-2.jpg" class="poster-img">
-        <div class="play-btn-overlay">▶ PLAY NOW</div>
-    </div>
-    <div class="movie-details">
-        <div class="movie-title">Shrouding The Heavens</div>
-    </div>
-</div>
+            <div class="poster-container">
+                <span class="badge-type">DONGHUA</span>
+                <img src="https://raw.githubusercontent.com/suonsamnang/donghausereis/main/shrouding-the-heavens-lucifer-donghua-2.jpg" class="poster-img">
+                <div class="play-btn-overlay">▶ PLAY NOW</div>
+            </div>
+            <div class="movie-details">
+                <div class="movie-title">Shrouding The Heavens</div>
+            </div>
+        </div>
 
         <div class="movie-card" onclick="openPlayer('YOUR_VIDEO_URL', 'World Defying Dan God')">
             <div class="poster-container">
                 <span class="badge-type">DONGHUA</span>
                 <img src="https://via.placeholder.com/300x450" class="poster-img">
-                
-                <div class="play-btn-overlay"><span>▶</span> PLAY NOW</div>
-                
+                <div class="play-btn-overlay">▶ PLAY NOW</div>
                 <div class="info-overlay">
                     <span>Ep 06 <span style="color:#ffcc00">[4K]</span></span>
                     <span style="background:#d48806; padding:2px 6px; border-radius:4px; font-weight:bold;">SUB</span>
@@ -114,7 +86,6 @@
                 <div class="movie-title">World Defying Dan God</div>
             </div>
         </div>
-
     </div>
 
     <div id="videoModal">
@@ -122,13 +93,23 @@
             <button class="back-btn" onclick="closePlayer()">← Back</button>
             <span id="playingTitle" style="margin-left:20px; font-size:15px; font-weight:bold;"></span>
         </div>
-        <iframe id="videoFrame" src="https://www.youtube.com/embed/_ijfRi-1-Ss?autoplay=1" allowfullscreen></iframe>
+        <div class="loader"></div> <iframe id="videoFrame" src="" allowfullscreen></iframe>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
         tg.ready();
+
+        // STEP 1 FUNCTION: FILTERING
+        function filterMovies() {
+            let input = document.getElementById('searchInput').value.toLowerCase();
+            let cards = document.getElementsByClassName('movie-card');
+            for (let i = 0; i < cards.length; i++) {
+                let title = cards[i].querySelector('.movie-title').innerText.toLowerCase();
+                cards[i].style.display = title.includes(input) ? "block" : "none";
+            }
+        }
 
         function openPlayer(url, title) {
             if(url.includes('YOUR_VIDEO_URL')) {
@@ -148,5 +129,3 @@
     </script>
 </body>
 </html>
-
-
