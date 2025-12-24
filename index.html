@@ -3,116 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Movie Mini App</title>
+    <title>Donghua Series</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* Modern Dark Theme */
-        body {
-            background-color: #1a1d20;
-            color: white;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 10px;
+        body { background-color: #121212; color: white; font-family: sans-serif; margin: 0; padding: 10px; overflow-x: hidden; }
+        
+        /* Header */
+        .section-header { background-color: #1b4d5a; padding: 12px; font-size: 18px; font-weight: bold; border-radius: 4px; margin-bottom: 20px; }
+
+        /* Grid */
+        .movie-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .movie-card { background: #1e1e1e; border-radius: 6px; overflow: hidden; position: relative; cursor: pointer; }
+
+        /* Poster & Badges */
+        .poster-container { position: relative; width: 100%; aspect-ratio: 2 / 3; }
+        .poster-img { width: 100%; height: 100%; object-fit: cover; }
+        .badge-type { position: absolute; top: 8px; right: 8px; background: #2c5ba1; font-size: 10px; padding: 3px 8px; border-radius: 4px; }
+        
+        /* Play Icon Overlay */
+        .play-overlay {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.6); color: white; width: 45px; height: 45px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;
         }
 
-        /* The "Popular Today" Header from your image */
-        .section-header {
-            background-color: #1b4d5a;
-            padding: 10px 15px;
-            font-size: 18px;
-            font-weight: bold;
-            border-radius: 4px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-        }
+        .info-overlay { position: absolute; bottom: 0; width: 100%; background: linear-gradient(transparent, black); padding: 8px; display: flex; justify-content: space-between; font-size: 11px; box-sizing: border-box; }
+        .movie-details { padding: 8px; text-align: center; }
+        .movie-title { font-size: 13px; font-weight: bold; }
 
-        /* The Grid: 2 columns for mobile */
-        .movie-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
+        /* VIDEO PLAYER MODAL */
+        #videoModal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999; flex-direction: column;
         }
-
-        .movie-card {
-            background: #24282c;
-            border-radius: 4px;
-            overflow: hidden;
-            position: relative;
-            transition: transform 0.2s;
-        }
-
-        .movie-card:active {
-            transform: scale(0.96);
-        }
-
-        /* Poster Image */
-        .poster-container {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 2 / 3;
-        }
-
-        .poster-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        /* Badges (DONGHUA, ONA, etc) */
-        .badge-type {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: #2c5ba1;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-
-        /* Episode & Quality Info Overlay */
-        .info-overlay {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 5px 8px;
-            box-sizing: border-box;
-            font-size: 11px;
-        }
-
-        .quality-tag {
-            color: #ffcc00;
-        }
-
-        .sub-tag {
-            background: #d48806;
-            padding: 1px 4px;
-            border-radius: 2px;
-            font-size: 9px;
-        }
-
-        /* Movie Title & Year */
-        .movie-details {
-            padding: 8px;
-            text-align: center;
-        }
-
-        .movie-title {
-            font-size: 13px;
-            font-weight: 500;
-            margin-bottom: 2px;
-            line-height: 1.2;
-        }
-
-        .movie-year {
-            font-size: 11px;
-            color: #999;
-        }
+        .modal-header { padding: 10px; display: flex; align-items: center; background: #1a1a1a; }
+        .back-btn { background: #333; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
+        #videoFrame { flex-grow: 1; border: none; width: 100%; height: 100%; }
     </style>
 </head>
 <body>
@@ -120,47 +46,55 @@
     <div class="section-header">Popular Today</div>
 
     <div class="movie-grid">
+        <div class="movie-card" onclick="openPlayer('https://www.youtube.com/embed/dQw4w9WgXcQ')">
+            <div class="poster-container">
+                <span class="badge-type">DONGHUA</span>
+                <img src="https://raw.githubusercontent.com/suonsamnang/donghausereis/main/shrouding-the-heavens-lucifer-donghua-2.jpg" class="poster-img">
+                <div class="play-overlay">▶</div>
+                <div class="info-overlay">
+                    <span>Ep 141 <span style="color:#ffcc00">[4K]</span></span>
+                    <span style="background:#d48806; padding:2px 4px; border-radius:2px;">Sub</span>
+                </div>
+            </div>
+            <div class="movie-details"><div class="movie-title">Shrouding The Heavens</div></div>
+        </div>
         
-        <div class="movie-card" onclick="openMovie('Shrouding The Heavens')">
-            <div class="poster-container">
+        <div class="movie-card" onclick="openPlayer('YOUR_VIDEO_LINK_HERE')">
+             <div class="poster-container">
                 <span class="badge-type">DONGHUA</span>
-                <img src="https://raw.githubusercontent.com/suonsamnang/donghausereis/main/shrouding-the-heavens-lucifer-donghua-2.jpg" class="poster-img" alt="Shrouding The Heavens">
-                <div class="info-overlay">
-                    <span>Ep 141 <span class="quality-tag">[4K]</span></span>
-                    <span class="sub-tag">Sub</span>
-                </div>
+                <img src="https://via.placeholder.com/300x450" class="poster-img">
+                <div class="play-overlay">▶</div>
             </div>
-            <div class="movie-details">
-                <div class="movie-title">Shrouding The Heavens</div>
-                <div class="movie-year">(2023)</div>
-            </div>
+            <div class="movie-details"><div class="movie-title">World Defying Dan God</div></div>
         </div>
+    </div>
 
-        <div class="movie-card" onclick="openMovie('World Defying Dan God')">
-            <div class="poster-container">
-                <span class="badge-type">DONGHUA</span>
-                <img src="https://via.placeholder.com/300x450?text=Poster+2" class="poster-img" alt="Poster">
-                <div class="info-overlay">
-                    <span>Ep 06 <span class="quality-tag">[4K]</span></span>
-                    <span class="sub-tag">Sub</span>
-                </div>
-            </div>
-            <div class="movie-details">
-                <div class="movie-title">World Defying Dan God</div>
-                <div class="movie-year">(2025)</div>
-            </div>
+    <div id="videoModal">
+        <div class="modal-header">
+            <button class="back-btn" onclick="closePlayer()">← Back</button>
+            <span id="playingTitle" style="margin-left:15px; font-size:14px; color:#888;">Playing...</span>
         </div>
-
+        <iframe id="videoFrame" src="" allowfullscreen></iframe>
     </div>
 
     <script>
-        // Initialize Telegram WebApp
-        const tele = window.Telegram.WebApp;
-        tele.expand(); // Make the app full screen
+        const tg = window.Telegram.WebApp;
+        tg.expand();
 
-        function openMovie(title) {
-            // This function would normally open the video link
-            tele.showAlert("You selected: " + title);
+        function openPlayer(url) {
+            if(url === 'YOUR_VIDEO_LINK_HERE') {
+                tg.showAlert("Please add a real video link in the code first!");
+                return;
+            }
+            document.getElementById('videoFrame').src = url;
+            document.getElementById('videoModal').style.display = 'flex';
+            // Optional: Vibrate phone when opening
+            tg.HapticFeedback.impactOccurred('medium');
+        }
+
+        function closePlayer() {
+            document.getElementById('videoModal').style.display = 'none';
+            document.getElementById('videoFrame').src = ''; // Stops the video
         }
     </script>
 </body>
